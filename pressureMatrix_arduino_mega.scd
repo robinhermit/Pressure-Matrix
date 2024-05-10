@@ -9,6 +9,8 @@ Tdef(\colorControl).stop;
 ~port.close;
 )
 
+
+// execute the following code
 (
 // PRESSURE SENSOR MATRIX ON ARDUINO MEGA
 
@@ -91,12 +93,12 @@ w = Window.new(bounds:Rect(800,300,20+(scale*columns),20+(scale*rows))).front; /
 
 		FluidBufOnsetSlice.processBlocking(s, src, metric: slice_metric, threshold: slice_threshold, indices: indices, action: {
 		//FluidBufAmpSlice.processBlocking(s, src, threshold: slice_threshold, indices: indices, action: {
-
+		FluidNoveltyFeature
 			"SLICES CREATED".postln;
 			"average seconds per slice: %".format(src.duration / indices.numFrames).postln;
 
 		});
-
+/*
 		// function to perform the slices
 		play_slice = {
 			arg index;
@@ -112,17 +114,20 @@ w = Window.new(bounds:Rect(800,300,20+(scale*columns),20+(scale*rows))).front; /
 				sig.dup * env;
 			}.play;
 		};
-
+*/
 		SynthDef.new(\synthSlice, {
-			arg index, amp;
+			arg index, amp,
+			atk=0.1, rel=0.1,
+			rate=1;
 			var startsamp, stopsamp, phs,
 			sig, dursecs, env, out;
 			startsamp = Index.kr(indices, index);
 			stopsamp = Index.kr(indices, index+1);
-			phs = Phasor.ar(0,BufRateScale.ir(src),startsamp,stopsamp);
-			sig = BufRd.ar(1, src, phs);
+			//phs = Phasor.ar(0,BufRateScale.ir(src),startsamp,stopsamp);
+			//sig = BufRd.ar(1, src, phs);
+			sig = PlayBuf.ar(1, src, rate, 1, startsamp/BufSampleRate.ir(src), 1);
 			dursecs = (stopsamp-startsamp) / BufSampleRate.ir(src);
-			env = EnvGen.kr(Env([0,1,1,0],[0.03, dursecs-(0.06), 0.03]), doneAction:2);
+			env = EnvGen.kr(Env([0,1,1,0],[atk, dursecs-(atk+rel), rel]), doneAction:2);
 			out = Out.ar(0, sig!2) * env * amp;
 		}).add;
 
@@ -294,15 +299,15 @@ Tdef(\colorCheck, {//observes grid status, plays slices at need
 			var pair, value;
 			pair = ~coor_coll.collect{
 				arg item, i;
-				[item[0], item[1], item]
+				[item[0], item[1]]
 			};
 			~point.setn(0,pair.flatten);
-			/*
+
 			~value = ~coor_coll.collect{
 				arg item, i;
 				item[2]; // this will go into amplitudes
 			};
-*/
+
 
 		};
 
@@ -313,12 +318,16 @@ Tdef(\colorCheck, {//observes grid status, plays slices at need
 				{	arg near; // pass array instead of 1 nearest
 					if(near != ~previous, {
 						near.postln;
-						/*near.do{
+						near.do{
 							arg i, count;
 							//play_slice.(near.asInteger, amp, atk, rel)
 							//play_slice.(near.asInteger, ~value[count].asFloat);
-							//Synth(\synthSlice, [\index, i.asInteger]);
-						};*/
+							Synth(\synthSlice, [
+								\index, i.asInteger,
+								\amp, ~value[count].asFloat.linlin(0,1,0,0.7),
+
+							]);
+						};
 						~previous=near;
 					});
 			});
