@@ -196,7 +196,7 @@ w = Window.new(bounds:Rect(800,300,20+(scale*columns),20+(scale*rows))).front; /
 						if(nearest != previous, {
 							nearest.postln;
 							view.highlight_(nearest);
-							play_slice.(nearest.asInteger);
+							//play_slice.(nearest.asInteger);
 							previous=nearest;
 						});
 					});
