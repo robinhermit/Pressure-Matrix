@@ -20,9 +20,7 @@ columns, rows, // user specified
 sound_folder_path, // user specified
 views, views_full, // handle GUI layouts & views
 play_slice, slice_threshold, slice_metric; // inside twoCorpus instrument, but also called at colorCheck rate
-
-sound_folder_path = "/Users/Robin/Desktop/TUTTO/ATTIVI/SillyCode/Samples_esther/";
-//sound_folder_path = FluidFilesPath(); // audio samples to map (directory)
+sound_folder_path = FluidFilesPath(); // audio samples to map (directory)
 scale = 60; // resize matrix window
 trig_threshold = 0.1; // thresh detection on matrix (0-1)
 range_min = 10; // min sensor value mapped
